@@ -1,34 +1,35 @@
 import tkinter
+from tkinter import filedialog
 import customtkinter
 from pytube import YouTube
-from pytube.exceptions import VideoUnavailable
 
 def startDownload():
     try:
         YouTube_Link = link.get()
-        YouTube_Object = YouTube(YouTube_Link, on_progress_callback=on_progress)
-        video = YouTube_Object.streams.get_highest_resolution()
-        title.configure(text=YouTube_Object.title)
-        finishLabel.configure(text="")
-        video.download()
-        finishLabel.configure(text="Downloaded!")
-    except VideoUnavailable:
-        finishLabel.configure(text="Video is unavailable or has been removed from YouTube.")
+        YouTube_Object =  YouTube(YouTube_Link, on_progress_callback=on_progress)
+        
+        # Get the stream with 4K resolution if available, otherwise get the highest resolution stream
+        video = YouTube_Object.streams.filter(res="2160p", file_extension="mp4").first() or YouTube_Object.streams.get_highest_resolution()
+
+        # Ask the user to select the download directory
+        download_directory = filedialog.askdirectory()
+        video.download(download_directory)
+
+        finishLabel.configure(text="Downloaded to:\n" + download_directory)
     except Exception as e:
-        print(f"Error: {e}")
-        finishLabel.configure(text="Download Error!")
+        finishLabel.configure(text=f"Download Error: {e}", text_color="red")
 
 def on_progress(stream, chunk, bytes_remaining):
-    total_Size = stream.filesize  # Fix typo here
+    total_Size = stream.filezise 
     bytes_downloaded = total_Size - bytes_remaining
-    percentage_of_completion = bytes_downloaded / total_Size * 100
-    print(percentage_of_completion)
-    per = str(int(percentage_of_completion))
-    pPercentage.configure(text=per + '%')
+    percentage_of_completation = bytes_downloaded / total_Size *100
+    print(percentage_of_completation)
+    per = str(int(percentage_of_completation))
+    pPercentage.configure(text = per + '%')
     pPercentage.update()
 
-    # Update progress bar
-    progressBar.set(float(percentage_of_completion) / 100)
+    #update progressbar
+    progressBar.set(float(percentage_of_completation)/100)
 
 
 

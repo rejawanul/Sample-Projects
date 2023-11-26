@@ -1,4 +1,5 @@
 import tkinter
+from tkinter import filedialog
 import customtkinter
 from pytube import YouTube
 
@@ -7,10 +8,12 @@ def startDownload():
         YouTube_Link = link.get()
         YouTube_Object =  YouTube(YouTube_Link, on_progress_callback=on_progress)
         video = YouTube_Object.streams.get_highest_resolution()
-        title.configure(text=YouTube_Object.title, text_color="white")
-        finishLabel.configure(text="")
-        video.download()
-        finishLabel.configure(text="Downloaded!")
+
+        # Ask the user to select the download directory
+        download_directory = filedialog.askdirectory()
+        video.download(download_directory)
+
+        finishLabel.configure(text="Downloaded to:\n" + download_directory)
     except Exception as e:
         finishLabel.configure(text=f"Download Error: {e}", text_color="red")
 
