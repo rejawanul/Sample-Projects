@@ -1,37 +1,28 @@
 import tkinter
-from tkinter import filedialog
 import customtkinter
 from pytube import YouTube
+from pytube.exceptions import VideoUnavailable
 
 def startDownload():
     try:
         YouTube_Link = link.get()
-        YouTube_Object =  YouTube(YouTube_Link, on_progress_callback=on_progress)
+        YouTube_Object = YouTube(YouTube_Link)
         video = YouTube_Object.streams.get_highest_resolution()
 
-        # Ask the user to select the download directory
-        download_directory = filedialog.askdirectory()
-        video.download(download_directory)
+        def on_progress(stream, chunk, bytes_remaining):
+            percent = (float(bytes_remaining / video.filesize) * 100)
+            progress_var.set(100 - int(percent))
+            app.update_idletasks()
 
-        finishLabel.configure(text="Downloaded to:\n" + download_directory)
+        video.download(output_path=".", filename="video", on_progress_callback=on_progress)
+        print("Download Complete")
+    except VideoUnavailable:
+        print("Video is unavailable or has been removed from YouTube.")
     except Exception as e:
-        finishLabel.configure(text=f"Download Error: {e}", text_color="red")
+        print(f"Error: {e}")
+        print("YouTube Link is invalid")
 
-def on_progress(stream, chunk, bytes_remaining):
-    total_size = stream.filesize  # Fix the typo here
-    bytes_downloaded = total_size - bytes_remaining
-    percentage_of_completion = bytes_downloaded / total_size * 100
-    print(percentage_of_completion)
-    per = str(int(percentage_of_completion))
-    pPercentage.configure(text=per + '%')
-    
-    # Move the update line here
-    pPercentage.update()
-
-    # Update progressbar
-    progressBar.set(float(percentage_of_completion) / 100)
-
-
+    print("Download Complete")
 
 # System Settings
 customtkinter.set_appearance_mode("System")
@@ -51,25 +42,14 @@ url_variable = tkinter.StringVar()
 link = customtkinter.CTkEntry(app, width=350, height=40, textvariable=url_variable)
 link.pack()
 
-
-#Finish Downloading
-finishLabel = customtkinter.CTkLabel(app, text="")
-finishLabel.pack()
-
-
-
-#progress percentage
-pPercentage = customtkinter.CTkLabel(app, text = "0%")
-pPercentage.pack()
-
-progressBar = customtkinter.CTkProgressBar(app, width=400)
-progressBar.set(0)
-progressBar.pack(padx=10, pady=10)
-
-
 # Download Button
 download = customtkinter.CTkButton(app, text="Download", command=startDownload)
-download.pack(padx=10, pady=20)
+download.pack(padx=10, pady=30)
+
+# Progress Bar
+progress_var = tkinter.IntVar()
+progress = customtkinter.CTkProgressBar(app, variable=progress_var)
+progress.pack(pady=10)
 
 # Run App
 app.mainloop()
