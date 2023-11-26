@@ -6,23 +6,31 @@ from pytube.exceptions import VideoUnavailable
 def startDownload():
     try:
         YouTube_Link = link.get()
-        YouTube_Object = YouTube(YouTube_Link)
+        YouTube_Object = YouTube(YouTube_Link, on_progress_callback=on_progress)
         video = YouTube_Object.streams.get_highest_resolution()
-
-        def on_progress(stream, chunk, bytes_remaining):
-            percent = (float(bytes_remaining / video.filesize) * 100)
-            progress_var.set(100 - int(percent))
-            app.update_idletasks()
-
-        video.download(output_path=".", filename="video", on_progress_callback=on_progress)
-        print("Download Complete")
+        title.configure(text=YouTube_Object.title)
+        finishLabel.configure(text="")
+        video.download()
+        finishLabel.configure(text="Downloaded!")
     except VideoUnavailable:
-        print("Video is unavailable or has been removed from YouTube.")
+        finishLabel.configure(text="Video is unavailable or has been removed from YouTube.")
     except Exception as e:
         print(f"Error: {e}")
-        print("YouTube Link is invalid")
+        finishLabel.configure(text="Download Error!")
 
-    print("Download Complete")
+def on_progress(stream, chunk, bytes_remaining):
+    total_Size = stream.filesize  # Fix typo here
+    bytes_downloaded = total_Size - bytes_remaining
+    percentage_of_completion = bytes_downloaded / total_Size * 100
+    print(percentage_of_completion)
+    per = str(int(percentage_of_completion))
+    pPercentage.configure(text=per + '%')
+    pPercentage.update()
+
+    # Update progress bar
+    progressBar.set(float(percentage_of_completion) / 100)
+
+
 
 # System Settings
 customtkinter.set_appearance_mode("System")
@@ -42,14 +50,25 @@ url_variable = tkinter.StringVar()
 link = customtkinter.CTkEntry(app, width=350, height=40, textvariable=url_variable)
 link.pack()
 
+
+#Finish Downloading
+finishLabel = customtkinter.CTkLabel(app, text="")
+finishLabel.pack()
+
+
+
+#progress percentage
+pPercentage = customtkinter.CTkLabel(app, text = "0%")
+pPercentage.pack()
+
+progressBar = customtkinter.CTkProgressBar(app, width=400)
+progressBar.set(0)
+progressBar.pack(padx=10, pady=10)
+
+
 # Download Button
 download = customtkinter.CTkButton(app, text="Download", command=startDownload)
-download.pack(padx=10, pady=30)
-
-# Progress Bar
-progress_var = tkinter.IntVar()
-progress = customtkinter.CTkProgressBar(app, variable=progress_var)
-progress.pack(pady=10)
+download.pack(padx=10, pady=20)
 
 # Run App
 app.mainloop()
