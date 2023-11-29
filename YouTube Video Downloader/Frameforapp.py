@@ -16,8 +16,12 @@ def startDownload():
         video.download(download_directory)
 
         finishLabel.configure(text="Downloaded to:\n" + download_directory)
+        
+        # Close the application after download completes
+        app.destroy()
     except Exception as e:
         finishLabel.configure(text=f"Download Error: {e}", text_color="red")
+
 
 def on_progress(stream, chunk, bytes_remaining):
     total_Size = stream.filezise 
