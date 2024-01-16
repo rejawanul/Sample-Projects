@@ -22,13 +22,15 @@ class BudgetCalculatorApp:
             tour_budget = total_amount * 0.02
             pocket_money = total_amount * 0.03
             backup_money = total_amount * 0.03
+            Reserve_Money = 2000
             internet_bill = 500
-            parents_share = total_amount - (tour_budget + pocket_money + backup_money + internet_bill)
+            parents_share = total_amount - (tour_budget + pocket_money + backup_money + internet_bill + Reserve_Money )
 
             result_message = f"Tour Budget (2%): {tour_budget:.2f} Taka\n" \
                              f"Pocket Money (3%): {pocket_money:.2f} Taka\n" \
                              f"Backup Money (3%): {backup_money:.2f} Taka\n" \
                              f"Internet Bill: {internet_bill:.2f} Taka\n" \
+                             f"Reserve_Money: {Reserve_Money:.2f} Taka\n" \
                              f"Parents Share: {parents_share:.2f} Taka"
 
             messagebox.showinfo("Result", result_message)
