@@ -19,27 +19,27 @@ def download_video():
         YouTube_Link = link.get()
         YouTube_Object = YouTube(YouTube_Link, on_progress_callback=on_progress)
 
-        # Get streams with only video
-        video_streams = YouTube_Object.streams.filter(file_extension='mp4', only_video=True)
+        # Get streams with both video and audio
+        video_streams = YouTube_Object.streams.filter(file_extension='mp4', progressive=True)
 
         # Get the user-selected resolution
         selected_resolution = resolution_var.get()
         video = None
 
-        if selected_resolution == '720p':
+        if selected_resolution == 'HD':
             video = video_streams.filter(res='720p').first()
-        elif selected_resolution == '1080p':
-            video = video_streams.filter(res='1080p').first()
+        elif selected_resolution == 'FULL':
+            video = video_streams.filter(res='1080p').first() or video_streams.filter(res='720p').first()
         elif selected_resolution == '4k':
-            video = video_streams.filter(res='2160p').first()
+            video = video_streams.filter(res='2160p').first() or video_streams.filter(res='1080p').first() or video_streams.filter(res='720p').first()
 
         if not video:
             finishLabel.configure(text=f"{selected_resolution} video not available", text_color="red")
             return
 
-         # Ask the user to select the download directory
+        # Ask the user to select the download directory
         download_directory = filedialog.askdirectory()
-        video.download(download_directory)
+        video.download(output_path=download_directory)
 
         finishLabel.configure(text=f"Downloaded {selected_resolution} video to:\n" + download_directory)
 
